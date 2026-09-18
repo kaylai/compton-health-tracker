@@ -1,4 +1,5 @@
 import Chart from 'chart.js/auto'
+import 'chartjs-adapter-date-fns';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -37,6 +38,18 @@ const chart = new Chart(
       type: 'line',
       options: {
         animation: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day'
+            },
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        },
         plugins: {
           legend: {
             display: false
@@ -47,11 +60,10 @@ const chart = new Chart(
         },
       },
       data: {
-        labels: sortedWeights.map(row => row.date),
         datasets: [
           {
             label: 'Weight over time',
-            data: sortedWeights.map(row => row.weight)
+            data: sortedWeights.map(row => ({ x: new Date(row.date), y: row.weight }))
           }
         ]
       }
@@ -62,8 +74,7 @@ function renderChart() {
   sortedWeights = hardcodedWeights
     .concat(newWeights)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
-  chart.data.labels = sortedWeights.map(row => row.date);
-  chart.data.datasets[0].data = sortedWeights.map(row => row.weight);
+  chart.data.datasets[0].data = sortedWeights.map(row => ({ x: new Date(row.date), y: row.weight }));
   chart.update();
 }
 
@@ -79,8 +90,9 @@ let selectedIndex = null;
 
 function openPopup(index, x, y) {
   selectedIndex = index;
-  popupLabel.textContent = `${chart.data.labels[index]}`;
-  popupWeight.textContent = `${chart.data.datasets[0].data[index]} lbs`;
+  const point = chart.data.datasets[0].data[index];
+  popupLabel.textContent = `${point.x.toLocaleDateString()}`;
+  popupWeight.textContent = `${point.y} lbs`;
   popupOverlay.style.left = `${x}px`;
   popupOverlay.style.top = `${y}px`;
   popupOverlay.classList.remove('hidden');

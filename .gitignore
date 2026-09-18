@@ -20,6 +20,7 @@ npm-debug.log*
 # Build artifacts
 dist/
 .cache/
+.parcel-cache/
 
 # Environment
 .env

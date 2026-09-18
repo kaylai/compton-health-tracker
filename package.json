@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "parcel index.html",
-    "build": "parcel build index.html --public-url ./"
+    "build": "parcel build index.html --public-url ./",
+    "clean": "rm -rf dist .parcel-cache"
   },
   "devDependencies": {
     "buffer": "^6.0.3",
@@ -16,6 +17,7 @@
     "@supabase/supabase-js": "^2.116.0",
     "chart.js": "^4.0.0",
     "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-zoom": "^2.2.0",
     "date-fns": "^4.4.0"
   }
 }

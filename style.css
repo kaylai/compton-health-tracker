@@ -141,6 +141,10 @@ select:focus { border-color: #3182ce; }
     justify-content: center; */
 }
 
+.popup-overlay.popup-overlay--below {
+    transform: translate(-50%, 10px);
+}
+
 .popup-overlay.hidden { display: none; }
 
 .popup-card {

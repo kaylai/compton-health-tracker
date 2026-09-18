@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compton's Health Tracker</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="header">
+      <h1>Compton's Health Tracker</h1>
+    </header>
+
+    <div class="main" id="mainPage">
+      <div class="card">
+        <span class="section-title" style="margin:0">Weight History</span>
+        <canvas id="weight"></canvas>
+      </div>
+
+      <!-- <script type="module" src="dimensions.js"></script> -->
+      <script type="module" src="app.js"></script>
+      <div class="container">
+        <div class="card">
+          <div class="section-title">Enter new weight measurement</div>
+          <div class="input-group">
+            <label>Weight (lbs)</label>
+            <div class="input-row">
+              <input type="number" id="new-weight" step="1" value="12">
+              <input type="date" id="new-weight-date">
+              <button class="add-data-btn" id="add-weight">Add</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="popup-overlay hidden" id="popup-overlay">
+      <div class="popup-card">
+        <label id="popup-label" class="popup-label"></label>
+        <label id="popup-weight" class="popup-weight"></label>
+        <button class="add-data-btn popup-delete-btn" id="popup-delete-btn">Delete entry</button>
+        <button class="add-data-btn popup-delete-btn popup-close-btn" id="popup-close-btn">Cancel</button>
+      </div>
+    </div>
+  </body>
+</html>

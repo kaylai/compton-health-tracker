@@ -9,19 +9,13 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 (async function() {
   const hardcodedWeights = [
-    { date: 2010, weight: 10 },
-    { date: 2011, weight: 20 },
-    { date: 2012, weight: 15 },
-    { date: 2013, weight: 25 },
-    { date: 2014, weight: 22 },
-    { date: 2015, weight: 30 },
-    { date: 2016, weight: 28 },
+    // { date: 2010, weight: 10 }
   ];
 
-const storageKey = 'weightEntries';
-
 const newWeights = await loadSavedWeights();
-const allWeights = hardcodedWeights.concat(newWeights); // original hard-coded data plus newly added weight values
+let sortedWeights = hardcodedWeights
+  .concat(newWeights)
+  .sort((a, b) => new Date(a.date) - new Date(b.date));
 
 /*--- Load weight data ---*/
 async function loadSavedWeights() {
@@ -34,23 +28,6 @@ async function loadSavedWeights() {
     return [];
   }
   return data;
-}
-
-/*--- Add or remove data to the chart ---*/
-function addData(chart, label, newData) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(newData);
-    });
-    chart.update();
-}
-
-function removeData(chart, index) {
-    chart.data.labels.splice(index, 1);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.splice(index, 1);
-    });
-    chart.update();
 }
 
 /*--- Define the chart ---*/
@@ -70,16 +47,26 @@ const chart = new Chart(
         },
       },
       data: {
-        labels: allWeights.map(row => row.date),
+        labels: sortedWeights.map(row => row.date),
         datasets: [
           {
             label: 'Weight over time',
-            data: allWeights.map(row => row.weight)
+            data: sortedWeights.map(row => row.weight)
           }
         ]
       }
     }
   );
+
+function renderChart() {
+  sortedWeights = hardcodedWeights
+    .concat(newWeights)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  chart.data.labels = sortedWeights.map(row => row.date);
+  chart.data.datasets[0].data = sortedWeights.map(row => row.weight);
+  chart.update();
+}
+
 
 /*--- Define a popup overlay for when a point is clicked ---*/
 const popupOverlay = document.getElementById('popup-overlay');
@@ -116,14 +103,13 @@ popupCloseBtn.addEventListener('click', closePopup);
 
 popupDeleteBtn.addEventListener('click', async () => {
   if (selectedIndex === null) return;
-  const newWeightsIndex = selectedIndex - hardcodedWeights.length;
+  const entry = sortedWeights[selectedIndex];
 
-  if (newWeightsIndex >= 0) {
-    const entry = newWeights[newWeightsIndex];
+  if (entry.id) {
     await supabase.from('weight_entries').delete().eq('id', entry.id);
-    newWeights.splice(newWeightsIndex, 1);
+    newWeights.splice(newWeights.indexOf(entry), 1);
   }
-  removeData(chart, selectedIndex);
+  renderChart();
   closePopup();
 });
 
@@ -151,7 +137,7 @@ addWeightBtn.addEventListener('click', async () => {
       }
 
     newWeights.push(data[0]);
-    addData(chart, label, value);
+    renderChart();
     weightInput.value = '';
 });
 

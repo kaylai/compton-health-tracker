@@ -1,5 +1,12 @@
 import Chart from 'chart.js/auto'
 
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://unidtbqbxtfomrccrisi.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuaWR0YnFieHRmb21yY2NyaXNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NTg4MTYsImV4cCI6MjEwNTMzNDgxNn0.rN6NyP05myolqMuDhbMl1b2E-U9igzDuYRIMidck5cs'; // long string, not a secret
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+
 (async function() {
   const hardcodedWeights = [
     { date: 2010, weight: 10 },
@@ -13,22 +20,20 @@ import Chart from 'chart.js/auto'
 
 const storageKey = 'weightEntries';
 
-const newWeights = loadNewWeights();
+const newWeights = await loadSavedWeights();
 const allWeights = hardcodedWeights.concat(newWeights); // original hard-coded data plus newly added weight values
 
 /*--- Load weight data ---*/
-function loadNewWeights() {
-  // try-catch block starts fresh w hard-coded data if the user-added entries are corrupted
-  try {
-    const raw = localStorage.getItem(storageKey);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return []; 
+async function loadSavedWeights() {
+  const { data, error } = await supabase
+    .from('weight_entries') // weight_entries table in supabase - defined in supabase web portal
+    .select('*')
+    .order('date')
+  if (error) {
+    console.error(error);
+    return [];
   }
-}
-
-function saveNewWeights(entries) {
-  localStorage.setItem(storageKey, JSON.stringify(entries));
+  return data;
 }
 
 /*--- Add or remove data to the chart ---*/
@@ -109,12 +114,14 @@ chart.canvas.onclick = (evt) => {
 
 popupCloseBtn.addEventListener('click', closePopup);
 
-popupDeleteBtn.addEventListener('click', () => {
+popupDeleteBtn.addEventListener('click', async () => {
   if (selectedIndex === null) return;
   const newWeightsIndex = selectedIndex - hardcodedWeights.length;
+
   if (newWeightsIndex >= 0) {
+    const entry = newWeights[newWeightsIndex];
+    await supabase.from('weight_entries').delete().eq('id', entry.id);
     newWeights.splice(newWeightsIndex, 1);
-    saveNewWeights(newWeights);
   }
   removeData(chart, selectedIndex);
   closePopup();
@@ -127,13 +134,23 @@ const addWeightBtn = document.getElementById('add-weight');
 
 dateInput.value = new Date().toISOString().slice(0, 10);
 
-addWeightBtn.addEventListener('click', () => {
+addWeightBtn.addEventListener('click', async () => {
     const value = parseFloat(weightInput.value);
     if (Number.isNaN(value)) return;
     if (!dateInput.value) return;
     const label = new Date(dateInput.value + 'T00:00:00').toLocaleDateString();
-    newWeights.push({ date: label, weight: value});
-    saveNewWeights(newWeights);
+    
+    const { data, error } = await supabase
+      .from('weight_entries')
+      .insert({ date: label, weight: value})
+      .select();
+    
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+    newWeights.push(data[0]);
     addData(chart, label, value);
     weightInput.value = '';
 });

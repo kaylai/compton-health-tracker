@@ -42,11 +42,31 @@ const chart = new Chart(
           x: {
             type: 'time',
             time: {
-              unit: 'day'
+              unit: 'month'
             },
             title: {
               display: true,
-              text: 'Date'
+              text: 'Date',
+              color: '#181818',
+              font: {
+                size: 14,
+              }
+            },
+            ticks: {
+              color: '#181818'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Weight (lbs)',
+              color: '#181818',
+              font: {
+                size: 14
+              }
+            },
+            ticks: {
+              color: '#181818',
             }
           }
         },
@@ -88,14 +108,35 @@ const popupCloseBtn = document.getElementById('popup-close-btn');
 
 let selectedIndex = null;
 
+const POPUP_MARGIN = 8;
+
 function openPopup(index, x, y) {
   selectedIndex = index;
   const point = chart.data.datasets[0].data[index];
   popupLabel.textContent = `${point.x.toLocaleDateString()}`;
   popupWeight.textContent = `${point.y} lbs`;
+
+  popupOverlay.classList.remove('popup-overlay--below');
   popupOverlay.style.left = `${x}px`;
   popupOverlay.style.top = `${y}px`;
   popupOverlay.classList.remove('hidden');
+
+  // Set popupOverlay location to work on m obile
+  if (popupOverlay.getBoundingClientRect().top < POPUP_MARGIN) {
+    popupOverlay.classList.add('popup-overlay--below');
+  }
+
+  // Ensure popupOverlay doesn't spill off the page
+  const rect = popupOverlay.getBoundingClientRect();
+  let dx = 0;
+  if (rect.left < POPUP_MARGIN) {
+    dx = POPUP_MARGIN - rect.left;
+  } else if (rect.right > window.innerWidth - POPUP_MARGIN) {
+    dx = (window.innerWidth - POPUP_MARGIN) - rect.right;
+  }
+  if (dx !== 0) {
+    popupOverlay.style.left = `${x + dx}px`;
+  }
 }
 
 function closePopup() {

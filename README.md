@@ -1,6 +1,17 @@
 # Compton's Health Tracker
 
-<a href="" target="_blank">Use the tracker here</a>
+<a href="https://kaylai.github.io/compton-health-tracker/" target="_blank">Use the tracker here</a>
+
+
+## Development
+
+Launch local server for testing:
+```Shell
+npm run dev
+```
+
+Database hosted on supabase.
+
 
 ## License
 

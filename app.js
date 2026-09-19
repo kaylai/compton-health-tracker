@@ -22,7 +22,7 @@ let sortedWeights = hardcodedWeights
 async function loadSavedWeights() {
   const { data, error } = await supabase
     .from('weight_entries') // weight_entries table in supabase - defined in supabase web portal
-    .select('*')
+    .select('*').eq('deleted', false)
     .order('date')
   if (error) {
     console.error(error);
@@ -159,7 +159,8 @@ popupDeleteBtn.addEventListener('click', async () => {
   const entry = sortedWeights[selectedIndex];
 
   if (entry.id) {
-    await supabase.from('weight_entries').delete().eq('id', entry.id);
+    // await supabase.from('weight_entries').delete().eq('id', entry.id);
+    await supabase.from('weight_entries').update({ deleted: true}).eq('id', entry.id);
     newWeights.splice(newWeights.indexOf(entry), 1);
   }
   renderChart();

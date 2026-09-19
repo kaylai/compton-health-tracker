@@ -48,6 +48,12 @@ body {
     margin-bottom: 10px;
 }
 
+.card-canvas {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* --- Form inputs --- */
 .input-group { margin-bottom: 12px; }
 .input-group:last-child { margin-bottom: 0; }
